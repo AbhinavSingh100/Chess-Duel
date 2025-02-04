@@ -10,6 +10,7 @@ import NewGame from './components/HomePage/NewGame'
 import LinkGame from './components/HomePage/LinkGame'
 import GenerateLink from './components/HomePage/GenerateLink'
 import EnterLink from './components/HomePage/EnterLink'
+import Register from './pages/Register'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -24,6 +25,7 @@ function App() {
       <Routes>
         <Route path='/login' element={<Login/>}/>
         <Route path='/' element={<Login/>}/>
+        <Route path='/register' element={<Register/>}/>
         <Route path='/home' element={<HomePage/>}>
           <Route path='new' element={<NewGame />}/>
           <Route path="link" element={<LinkGame />}/>

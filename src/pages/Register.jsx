@@ -19,17 +19,11 @@ const Register = () => {
           try{
               await createUserWithEmailAndPassword(auth, email, password)
               await saveUserData()
-              saveUserDataLocally()
               navigate('/login')
           }
           catch(error){
               setError(error.message)
           }
-      }
-
-      const saveUserDataLocally = () => {
-        sessionStorage.setItem('username', username)
-        sessionStorage.setItem('rating', rating)
       }
 
       const saveUserData = async () => {
@@ -73,7 +67,7 @@ const Register = () => {
                   <div className='flex justify-between p-1'>
                       <label className='text-red-800 font-semibold w-full'>Password</label>
                       <button type='button' className='text-red-800 font-bold'
-                          onClick={togglePasswordVisibility} ><i class={showPassword ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"} style={{color: "#991b1b"}}></i> Show</button>
+                          onClick={togglePasswordVisibility} ><i className={showPassword ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"} style={{color: "#991b1b"}}></i> Show</button>
                   </div>
                   <input 
                       onChange={(e) => setPassword(e.target.value)}

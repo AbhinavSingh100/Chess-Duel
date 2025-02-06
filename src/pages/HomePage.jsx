@@ -1,20 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import './HomePage.css'
-import NewGame from '../components/HomePage/NewGame'
-import LinkGame from '../components/HomePage/LinkGame'
-import GenerateLink from '../components/HomePage/GenerateLink'
-import EnterLink from '../components/HomePage/EnterLink'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
+import UserInfoHeader from '../components/others/UserInfoHeader'
 
 const HomePage = () => {
+  const navigate = useNavigate()
+  const username = sessionStorage.getItem('username')
+  const rating = sessionStorage.getItem('rating')
+  useEffect(() => {
+    if(!username || !rating) navigate('/login')
+  },[])
+  
   return (
     <>
-    <div className='home-background flex justify-center items-center w-screen h-screen'>
+    <div className='home-background flex justify-center items-center w-screen h-screen relative'>
+      <div className='fixed top-0 left-0 '>
+        {username && rating && <UserInfoHeader username={username} rating={rating}/>}
+      </div>
       <Outlet/>
-        {/* <NewGame/> */}
-        {/* <LinkGame/> */}
-        {/* <GenerateLink/> */}
-        {/* <EnterLink/> */}
     </div>
 
     </>

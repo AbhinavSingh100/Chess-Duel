@@ -32,7 +32,7 @@ function App() {
           <Route path="link/generate" element={<GenerateLink />} />
           <Route path="link/enter" element={<EnterLink />} />
         </Route>
-        <Route path='/game' element={<Game player1={player1} player2={player2}/>}/>
+        <Route path='/game/:gameId' element={<Game/>}/>
       </Routes>
 
       </BrowserRouter>

@@ -6,7 +6,6 @@ import { Chess } from "chess.js";
 import './board.css'
 import Tile from './Tile';
 import { asciiToPieces } from '../../game logic/AsciiToBoard.js';
-// import { moveIfValid } from '../../game logic/MoveIfValid.js';
 import bdt from '../../assets/pieces/bdt.svg'
 import kdt from '../../assets/pieces/kdt.svg'
 import klt from '../../assets/pieces/klt.svg'
@@ -19,12 +18,19 @@ import rlt from '../../assets/pieces/rlt.svg'
 import rdt from '../../assets/pieces/rdt.svg'
 import plt from '../../assets/pieces/plt.svg'
 import pdt from '../../assets/pieces/pdt.svg'
+import { get, onValue, ref, update } from 'firebase/database';
+import { db } from '../../firebase/FirebaseConfig.js';
 
 
-const Board = (props) => {
+const Board = ({color, gameId}) => {
   let board = []
   const horizontalIndex = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
   const verticalIndex = [1, 2, 3, 4, 5, 6, 7, 8]
+
+  const gameRef = ref(db, 'games/' + gameId)
+  const game = useRef(new Chess("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
+  
+  const [isWhiteTurn, setIsWhiteTurn] = useState(true);
 
   const [pieces, setPieces] = useState([
   { key: '0,0', pieceName: 'rook dark left', image: rdt, x: 0, y: 0},
@@ -64,20 +70,54 @@ const Board = (props) => {
   let horizontal = []
 
 
+  useEffect(() => {
+
+    onValue(gameRef, (snapshot) => {
+      if (snapshot.exists()) {
+        
+        const turn = snapshot.val().turn
+        const boardPos = snapshot.val().boardPosition
+        const movesArr = snapshot.val().moveHistory
+        const move = movesArr ? movesArr[movesArr.length-1] : null;
+        console.log(`turn: ${turn}, move: ${move}`)
+        if(move && game.current.moves().includes(move)) {
+          console.log(`correct move: ${move}`)
+
+          if (move.match(/^[a-h][17]$/)) { // Pawn reaches last rank
+            game.current.move(`${move}=Q`); // Promote to queen
+          } else {
+            game.current.move(move);
+          }
+          console.log(game.current.ascii())
+          setPieces(asciiToPieces(boardPos))
+          setIsWhiteTurn(turn === 'white')
+        }
+        else{
+          console.log(`wrong move: ${move}`)
+          console.log(game.current.ascii())
+        }
+
+      } else {
+        console.log("No data available");    
+      }
+    })
+  },[])
+
+
 
 
   // Render axes*********************************************************************************************************************************
   for(let i=7;i>=0;i--){
-    vertical.push(<div className='vertical-index'>{verticalIndex[i]}</div>)
+    vertical.push(<div className='vertical-index'>{verticalIndex[color === 'white' ? i : 7-i]}</div>)
   }
   for(let i=0;i<8;i++){
     horizontal.push(<div className='horizontal-index'>{horizontalIndex[i]}</div>)
   }
 
   //Start Game************************************************************************************************************************
-  const game = useRef(new Chess("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
   
   const moveIfValid = (fromX, fromY, toX, toY) => {
+    console.log('flag 4')
     const file = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     const rank = ['8', '7', '6', '5', '4', '3', '2', '1'];
     const fromPos = file[fromX] + rank[fromY]; // Convert (x, y) to chess notation
@@ -85,29 +125,32 @@ const Board = (props) => {
 
     const validMoves = game.current.moves({square: fromPos})
     const move = validMoves.find(m => m.includes(toPos)|| m==='O-O'|| m==='O-O-O')
+    console.log(game.current.moves({square: fromPos}))
     if(move){
+      console.log('flag 5')
       game.current.move({from: fromPos, to: toPos, promotion: 'q'});
       console.log(move)
-      return true
+      return move
     }
-    else{
-      return false
-    }
+    else console.log(move)
   }
 
   // Handle piece selection***********************************************************************************************************
   const [selectedPiece, setSelectedPiece] = useState(null);
   const onTileClick = (xCoord, yCoord) => {
+    console.log('flag 1')
     if(selectedPiece){
+      console.log('flag 2')
       if(xCoord === selectedPiece.x && yCoord === selectedPiece.y){
         setSelectedPiece(null);
       }
       else{
-        
-        if(moveIfValid(selectedPiece.x, selectedPiece.y, xCoord, yCoord)){
-          
+        console.log('flag 3')
+        const move = moveIfValid(selectedPiece.x, selectedPiece.y, xCoord, yCoord)
+        if(move){
           console.log(game.current.ascii())
           setPieces(asciiToPieces(game.current.ascii()));
+          makeMove(move)
         }
         setSelectedPiece(null);
       }
@@ -121,16 +164,22 @@ const Board = (props) => {
     }
   }
 
+  const helperOnTileClick = (j, i) => {
+    console.log(color)
+    console.log(isWhiteTurn? 'white turn' : 'black turn')
+    if(isWhiteTurn && color === 'white' || !isWhiteTurn && color === 'black') onTileClick(j, i)
+  }
+
 
 
   // Render board******************************************************************************************************************************
-  for(let i = 0; i < 8; i++){
+  for(let i = color === 'white' ? 0 : 7; color === 'white' ? i < 8 : i >= 0; color === 'white' ? i++ : i--){
     for(let j = 0; j < 8; j++){
       let piece = pieces.find((piece) => piece.x === j && piece.y === i);
       let im = piece ? piece.image : null;
       let isSelected = selectedPiece && selectedPiece.x === j && selectedPiece.y === i;
       board.push(
-        <div key={`${j}-${i}`} onClick={() => onTileClick(j, i)}>
+        <div key={`${j}-${i}`} onClick={() => helperOnTileClick(j, i)}>
         <Tile 
           color={(i + j) % 2 === 0 ? 'white' : 'black'}
           image={im}
@@ -141,7 +190,37 @@ const Board = (props) => {
     }
   }
   
+  // Firebase handling on making move******************************************************************************************************************************
+  const makeMove = async (move) => {
+    const boardPos = game.current.ascii()
+    await update(gameRef, { boardPosition : boardPos })
+    const snapshot = await get(gameRef)
+    if (snapshot.exists()) {
+      let movesArr = snapshot.val().moveHistory
+      if(movesArr) movesArr.push(move)
+      else movesArr = [move]
+      await update(gameRef, { moveHistory : movesArr , turn : color === 'white' ? 'black' : 'white' })
+      setIsWhiteTurn((isTurn) => !isTurn)
+    } else {
+      console.log("No data available");
+    }    
+  }
 
+  // Firebase handling on getting move******************************************************************************************************************************
+  
+  
+  
+  // const getMove = async () => {
+  //   const snapshot = await get(gameRef)
+  //   if (snapshot.exists()) {
+  //     const turn = snapshot.val().turn
+  //     const boardPos = snapshot.val().boardPosition
+  //     setIsWhiteTurn(turn === 'white')
+  //     setPieces(asciiToPieces(boardPos))
+  //   } else {
+  //     console.log("No data available");    
+  //   }
+  // }
 
 
   return (

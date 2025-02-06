@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { auth } from '../firebase/FirebaseConfig'
+import { auth, db, ref, get } from '../firebase/FirebaseConfig'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 
 const Login = () => {
@@ -16,6 +16,7 @@ const Login = () => {
         e.preventDefault()
         try{
             await signInWithEmailAndPassword(auth, email, password)
+            await saveUserDataLocally()
             navigate('/home/new')
         }
         catch(error){
@@ -23,6 +24,16 @@ const Login = () => {
         }
         
 
+    }
+
+    const saveUserDataLocally = async () => {
+        const userRef = ref(db, 'users/' + auth.currentUser.uid);
+        const snapshot = await get(userRef);
+        const userData = snapshot.val();
+        const username = userData.username;
+        const rating = userData.rating;
+        sessionStorage.setItem('username', username)
+        sessionStorage.setItem('rating', rating)
     }
 
     const togglePasswordVisibility = () => {
@@ -45,7 +56,7 @@ const Login = () => {
                 <div className='flex justify-between p-1'>
                     <label className='text-red-800 font-semibold'>Password</label>
                     <button type='button' className='text-red-800 text-base font-bold'
-                        onClick={togglePasswordVisibility} ><i class={showPassword ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"} style={{color: "#991b1b"}}></i> Show</button>
+                        onClick={togglePasswordVisibility} ><i className={showPassword ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"} style={{color: "#991b1b"}}></i> Show</button>
                 </div>
                 <input 
                     onChange={(e) => setPassword(e.target.value)}

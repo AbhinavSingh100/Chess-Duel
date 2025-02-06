@@ -1,15 +1,15 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, get, onValue } from "firebase/database";
+import { getDatabase, ref, set, onValue } from "firebase/database";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBI4021PBWh8NQFObprCrEybQf3R5bTQiQ",
-    authDomain: "chess-duel.firebaseapp.com",
-    projectId: "chess-duel",
-    storageBucket: "chess-duel.firebasestorage.app",
-    messagingSenderId: "270525238908",
-    appId: "1:270525238908:web:07bc1386568ade05ca43f9",
-    measurementId: "G-158GKFXFL9"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 // Initialize Firebase
@@ -18,4 +18,4 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-export { db, ref, set, get, onValue, auth, provider, signInWithPopup };
+export { db, ref, set, onValue, auth, provider, signInWithPopup };

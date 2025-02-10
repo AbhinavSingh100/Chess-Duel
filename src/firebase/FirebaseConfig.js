@@ -3,16 +3,19 @@ import { getDatabase, ref, set, get, onValue } from "firebase/database";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBI4021PBWh8NQFObprCrEybQf3R5bTQiQ",
-    authDomain: "chess-duel.firebaseapp.com",
-    projectId: "chess-duel",
-    storageBucket: "chess-duel.firebasestorage.app",
-    messagingSenderId: "270525238908",
-    appId: "1:270525238908:web:07bc1386568ade05ca43f9",
-    measurementId: "G-158GKFXFL9"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+    
 };
 
 // Initialize Firebase
+console.log(import.meta.env.VITE_FIREBASE_MEASUREMENT_ID)
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { auth, db, ref, get } from '../firebase/FirebaseConfig'
+import { auth, db, ref} from '../firebase/FirebaseConfig'
+import { get } from 'firebase/database'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 
 const Login = () => {
